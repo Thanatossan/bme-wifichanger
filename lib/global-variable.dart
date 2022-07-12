@@ -5,7 +5,7 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 bool isLoggedIn = false;
 BluetoothDevice selectedDevice = BluetoothDevice(name: "Non-connected",address: "0") ;
-
+String selectedItem = 'Wifi not Found';
 bool isConnected = false;
 bool changeToText = false;
 bool isStartMeasure =false;
