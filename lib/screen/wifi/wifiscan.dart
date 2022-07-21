@@ -31,6 +31,11 @@ class _wifiScanState extends State<wifiScan> {
     setState(() => listSSID = results.value!.map((accessPoint) => accessPoint.ssid).toList());
 
   }
+  //TODO must test
+  void startAndScan(BuildContext context) async {
+      _startScan(context);
+      _getScannedResults(context);
+  }
 
   final _formKey = GlobalKey<FormState>();
   String password = "";
