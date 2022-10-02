@@ -21,6 +21,7 @@ class _wifiScanState extends State<wifiScan> {
 
   Future<void> _startScan(BuildContext context) async {
     final result = await WiFiScan.instance.startScan(askPermissions: true);
+
     setState(() => accessPoints = <WiFiAccessPoint>[]);
   }
   void _getScannedResults(BuildContext context) async {
@@ -31,9 +32,12 @@ class _wifiScanState extends State<wifiScan> {
     setState(() => listSSID = results.value!.map((accessPoint) => accessPoint.ssid).toList());
 
   }
+
+
   //TODO must test
   void startAndScan(BuildContext context) async {
       _startScan(context);
+      listSSID = [];
       _getScannedResults(context);
   }
 
@@ -47,29 +51,37 @@ class _wifiScanState extends State<wifiScan> {
           SizedBox(height: 10,),
           Text("Setting Wifi",style: TextStyle(color: mPrimaryColor , fontSize: 30)),
           SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton.icon(
-
-                icon: const Icon(Icons.perm_scan_wifi),
-                label: const Text('SCAN'),
-                onPressed: () async => _startScan(context),
-                style: ElevatedButton.styleFrom(primary: mSecondaryColor),
-              ),
-              SizedBox(width: 20),
-              ElevatedButton.icon(
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //     ElevatedButton.icon(
+          //
+          //       icon: const Icon(Icons.perm_scan_wifi),
+          //       label: const Text('SCAN'),
+          //       onPressed: () async => _startScan(context),
+          //       style: ElevatedButton.styleFrom(primary: mSecondaryColor),
+          //     ),
+          //     SizedBox(width: 20),
+          //     ElevatedButton.icon(
+          //       icon: const Icon(Icons.refresh),
+          //       label: const Text('GET'),
+          //       onPressed: () async => _getScannedResults(context),
+          //       style: ElevatedButton.styleFrom(primary: mSecondaryColor),
+          //     ),
+          //
+          //   ],
+          // ),
+          ElevatedButton.icon(
                 icon: const Icon(Icons.refresh),
-                label: const Text('GET'),
-                onPressed: () async => _getScannedResults(context),
+                label: const Text('GET WIFI'),
+                onPressed: () async => startAndScan(context),
                 style: ElevatedButton.styleFrom(primary: mSecondaryColor),
               ),
 
-            ],
-          ),
           SizedBox(height: 20,),
           listSSID.isEmpty? Text("NO SCANNED RESULTS", style: TextStyle(color: mSecondaryColor,fontSize: 23),):
               DropdownButton(
+
                   icon: const Icon(Icons.arrow_downward),
                   elevation: 16,
                   style:  TextStyle(color: mSecondaryColor,fontSize: 20),
@@ -77,6 +89,7 @@ class _wifiScanState extends State<wifiScan> {
                     height: 2,
                     color: mSecondaryColor,
                   ),
+
                   items: listSSID.map((ssid) =>
               DropdownMenuItem(child: Text(ssid) , value: ssid)
               ).toList(),
