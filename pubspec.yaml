@@ -38,7 +38,7 @@ dependencies:
   flutter_easyloading: ^3.0.3
   flutter_bluetooth_serial: ^0.4.0
   flutter_svg: ^0.22.0
-  wifi_scan: ^0.3.0
+  wifi_scan: ^0.4.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

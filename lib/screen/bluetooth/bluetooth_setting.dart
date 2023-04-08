@@ -198,6 +198,15 @@ class _BluetoothSettingState extends State<BluetoothSetting> {
     }
   }
   void _sendMessage(String text) async {
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Wifi Connected'),
+        ),
+      );
+    }
+
     print(text);
     text = text.trim();
 
@@ -377,8 +386,8 @@ class _BluetoothSettingState extends State<BluetoothSetting> {
                     ),
 
                   onPressed: () => _sendMessage("${globals.selectedItem},$password" "\n"),
+                  // onPressed: () => print(globals.selectedItem),
                   child: Text('Submit',style: TextStyle(color: Colors.white , fontSize: 15)),
-
                 ),
               )
             ],

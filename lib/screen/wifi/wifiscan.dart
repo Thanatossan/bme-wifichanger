@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:wifi_scan/wifi_scan.dart';
 import 'package:wifi_changer/constant.dart';
 import 'package:wifi_changer/global-variable.dart' as globals;
+
 class wifiScan extends StatefulWidget {
   const wifiScan({Key? key}) : super(key: key);
 
@@ -13,32 +14,69 @@ class wifiScan extends StatefulWidget {
 class _wifiScanState extends State<wifiScan> {
   List<WiFiAccessPoint> accessPoints = <WiFiAccessPoint>[];
   List<String> listSSID = <String>[];
-
+  bool canScan = true;
   StreamSubscription<List<WiFiAccessPoint>>? subscription;
   bool shouldCheckCan = true;
 
   bool get isStreaming => subscription != null;
 
   Future<void> _startScan(BuildContext context) async {
-    final result = await WiFiScan.instance.startScan(askPermissions: true);
+    listSSID = [];
+    final can = await WiFiScan.instance.canStartScan();
+    if (can != CanStartScan.yes) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(
+            content: Text('Cannot start scan wifi : $can'),
+          ),
+        );
+      }
 
+      return;
+    }
+    final result = await WiFiScan.instance.startScan();
+    // if (mounted) kShowSnackBar(context, "startScan: $result");
+    // reset access points.
     setState(() => accessPoints = <WiFiAccessPoint>[]);
   }
-  void _getScannedResults(BuildContext context) async {
-    // get scanned results
-    final results = await WiFiScan.instance.getScannedResults(askPermissions: true);
+  Future<bool> _canGetScannedResults(BuildContext context) async {
 
-    setState(() => accessPoints = results.value!);
-    setState(() => listSSID = results.value!.map((accessPoint) => accessPoint.ssid).toList());
-
+    if (shouldCheckCan) {
+      // check if can-getScannedResults
+      final can = await WiFiScan.instance.canGetScannedResults();
+      // if can-not, then show error
+      if (can != CanGetScannedResults.yes) {
+        // if (mounted) kShowSnackBar(context, "Cannot get scanned results: $can");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Cannot get scanned wifi : $can'),
+            ),
+          );
+        }
+        accessPoints = <WiFiAccessPoint>[];
+        return false;
+      }
+    }
+    return true;
   }
+  Future<void> _getScannedResults(BuildContext context) async {
+    if (await _canGetScannedResults(context)) {
+      // get scanned results
+      final results = await WiFiScan.instance.getScannedResults();
+      setState(() => accessPoints = results);
+      // print(results);
+      setState(() => listSSID = results.map((accessPoint) => accessPoint.ssid).toList());
+      // print(listSSID);
 
+    }
+  }
 
   //TODO must test
   void startAndScan(BuildContext context) async {
-      _startScan(context);
+      await _startScan(context);
       listSSID = [];
-      _getScannedResults(context);
+      await _getScannedResults(context);
   }
 
   final _formKey = GlobalKey<FormState>();
@@ -90,7 +128,7 @@ class _wifiScanState extends State<wifiScan> {
                     color: mSecondaryColor,
                   ),
 
-                  items: listSSID.map((ssid) =>
+                  items: listSSID.toSet().map((ssid) =>
               DropdownMenuItem(child: Text(ssid) , value: ssid)
               ).toList(),
                   value: globals.selectedItem == 'Wifi not Found'?listSSID[0]:globals.selectedItem,
@@ -100,8 +138,9 @@ class _wifiScanState extends State<wifiScan> {
                 }).toList();
               },onChanged: (String? ssid)=> setState(
                       ()=> globals.selectedItem = ssid!
+              )
 
-              )),
+              ),
 
         ],
 
